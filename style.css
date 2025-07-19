@@ -1,0 +1,107 @@
+/* Use the Inter font for the entire page */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Ensure the chat messages area scrolls smoothly */
+#chat-messages {
+    scroll-behavior: smooth;
+}
+
+/* NEW: Container for the message bubble and its metadata */
+.message-container {
+    display: flex;
+    flex-direction: column;
+    max-width: 75%;
+}
+.message-container.sent {
+    align-self: flex-end;
+}
+.message-container.received {
+    align-self: flex-start;
+}
+
+/* NEW: The message bubble itself, now using flexbox for text and ticks */
+.message-bubble {
+    padding: 0.5rem 1rem;
+    border-radius: 1.25rem;
+    display: flex;
+    align-items: flex-end; /* Aligns text and ticks to the bottom */
+    gap: 0.5rem;
+    word-wrap: break-word;
+}
+.message-bubble.sent {
+    background-color: #3b82f6; /* Tailwind's blue-500 */
+    color: white;
+}
+.message-bubble.received {
+    background-color: #e5e7eb; /* Tailwind's gray-200 */
+    color: #1f2937; /* Tailwind's gray-800 */
+}
+.message-text {
+    padding-bottom: 2px; /* Small padding to align with ticks */
+}
+
+/* Styling for system messages (e.g., "User has disconnected") */
+.message-system {
+    align-self: center;
+    background-color: #f3f4f6; /* Tailwind's gray-100 */
+    color: #6b7280; /* Tailwind's gray-500 */
+    font-style: italic;
+    font-size: 0.875rem; /* text-sm */
+    text-align: center;
+    padding: 0.5rem 1rem;
+    border-radius: 1rem;
+}
+
+/* Styles for the container of the tick icons */
+.ticks {
+    line-height: 1; /* Ensures ticks align properly */
+}
+
+/* NEW: Styles for the typing indicator */
+#typing-indicator {
+    display: none; /* Hidden by default */
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: #6b7280; /* gray-500 */
+}
+#typing-indicator .dot {
+    width: 8px;
+    height: 8px;
+    background-color: #9ca3af; /* gray-400 */
+    border-radius: 50%;
+    animation: typing-bounce 1.3s infinite ease-in-out;
+}
+#typing-indicator .dot:nth-child(2) { animation-delay: 0.2s; }
+#typing-indicator .dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing-bounce {
+    0%, 60%, 100% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-6px);
+    }
+}
+
+/* NEW: Style for the PNG tick icons */
+.tick-icon {
+    width: 25px;
+    height: 25px;
+}
+
+/* ADD THESE STYLES FOR DARK MODE */
+
+/* Dark mode style for received message bubbles */
+.dark .message-bubble.received {
+  background-color: #374151; /* Tailwind's gray-700 */
+  color: #f3f4f6; /* Tailwind's gray-100 */
+}
+
+/* Dark mode style for system messages */
+.dark .message-system {
+  background-color: #1f2937; /* Tailwind's gray-800 */
+  color: #9ca3af; /* Tailwind's gray-400 */
+}
