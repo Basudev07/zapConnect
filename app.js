@@ -7,6 +7,8 @@ import {
     collection, addDoc, query, where, getDocs, deleteDoc, 
     serverTimestamp, orderBy
 } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+// UPDATED: Add Realtime Database import
+import { getDatabase, ref, onValue, onDisconnect, set } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
 // --- Firebase Configuration ---
 // IMPORTANT: Replace this with your own Firebase project configuration!
@@ -16,7 +18,9 @@ const firebaseConfig = {
     projectId: "anonymous-chat-61a9b",
     storageBucket: "anonymous-chat-61a9b.appspot.com",
     messagingSenderId: "38930594500",
-    appId: "1:38930594500:web:d6710d4a6ceec05ae7e791"
+    appId: "1:38930594500:web:d6710d4a6ceec05ae7e791",
+    // UPDATED: Add the correct databaseURL for your region
+    databaseURL: "https://anonymous-chat-61a9b-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 
 // --- Main App Logic ---
@@ -36,20 +40,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeToggler = document.getElementById('dark-mode-toggler');
     const themeToggleKnob = document.getElementById('dark-mode-knob');
     const html = document.documentElement;
+    // UPDATED: Add online count element
+    const onlineCountEl = document.getElementById('online-count');
 
     // --- Global State Variables ---
-    let db, auth;
+    let app, db, auth; // UPDATED: Make `app` available globally within this scope
     let userId;
     let strangerId = null;
     let currentChatRoomId = null;
     let unsubscribeChat = null;
     let unsubscribeUserStatus = null;
     let typingTimeout = null;
-    let isSearching = false; // NEW: State to track if we are currently searching
+    let isSearching = false;
 
     // --- Initialization ---
     try {
-        const app = initializeApp(firebaseConfig);
+        app = initializeApp(firebaseConfig); // UPDATED: Initialize the global `app`
         db = getFirestore(app);
         auth = getAuth(app);
         
@@ -60,6 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     userIdEl.textContent = userId.substring(0, 8);
                 }
                 console.log("User authenticated with ID:", userId);
+                // UPDATED: Call the presence system setup
+                setupPresenceSystem();
             })
             .catch((error) => {
                 console.error("Anonymous sign-in failed:", error);
@@ -109,7 +117,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         container.appendChild(bubble);
         chatMessagesEl.appendChild(container);
-        chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+        // Use a small timeout to ensure the DOM has updated before scrolling
+    setTimeout(() => {
+    chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+}, 0);
     }
 
     /**
@@ -144,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function resetButtonToDefault() {
         if (!newStrangerButton) return;
-        isSearching = false; // UPDATED: Reset searching state
+        isSearching = false;
         newStrangerButton.disabled = false;
         newStrangerButton.innerHTML = 'Find New Stranger';
         newStrangerButton.classList.remove('bg-red-500', 'hover:bg-red-600');
@@ -180,6 +191,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (unsubscribeChat) unsubscribeChat();
     }
 
+    // UPDATED: Presence System Logic
+    function setupPresenceSystem() {
+        const rtDb = getDatabase(app);
+        const myStatusRef = ref(rtDb, 'status/' + userId);
+
+        onValue(ref(rtDb, '.info/connected'), (snapshot) => {
+            if (snapshot.val() === false) {
+                return;
+            }
+            onDisconnect(myStatusRef).remove();
+            set(myStatusRef, true);
+        });
+
+        onValue(ref(rtDb, 'status'), (snapshot) => {
+            const count = snapshot.exists() ? snapshot.size : 0;
+            if (onlineCountEl) {
+                onlineCountEl.textContent = count;
+            }
+        });
+    }
+
     // --- Core Chat Logic ---
 
     /**
@@ -193,8 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resetChatUI();
         statusEl.textContent = "Searching for a stranger...";
         
-        // UPDATED: Set button to loading state
-        isSearching = true; // UPDATED: Set searching state
+        isSearching = true;
         newStrangerButton.innerHTML = `
             <div role="status" class="flex items-center justify-center">
                 <svg aria-hidden="true" class="inline w-6 h-6 mr-3 text-white animate-spin fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -363,7 +394,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Event Listeners ---
 
     newStrangerButton.addEventListener('click', () => {
-        // UPDATED: Logic now checks the 'isSearching' flag instead of the disabled property.
         if (isSearching) {
             leaveChatRoom();
             statusEl.textContent = "Search canceled.";
