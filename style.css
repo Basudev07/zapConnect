@@ -1,3 +1,9 @@
+/* Custom utility for full dynamic screen height */
+.h-dvh {
+    height: 100vh; /* Fallback for older browsers */
+    height: 100dvh;
+}
+
 /* Use the Inter font for the entire page */
 body {
     font-family: 'Inter', sans-serif;
