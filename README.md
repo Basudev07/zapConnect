@@ -2,7 +2,7 @@
 
 **zapConnect** is a real-time, user-connection web app that randomly connects two active users on the site for conversation. Built with **HTML**, **CSS**, **JavaScript**, and powered by **Firebase Realtime Database**, the platform is fully responsive, optimized for small screens, and features dark mode for a modern experience.
 
-> 🔗 [Live Demo](https://basudev07.github.io/zapConnect)
+> 🔗 Live Demo-  https://basudev07.github.io/zapConnect
 
 ---
 
